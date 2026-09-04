@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: data_core
+          POSTGRES_USER: data_core
+          POSTGRES_PASSWORD: data_core
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd "pg_isready -U data_core -d data_core"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+    env:
+      DATABASE_URL: postgresql://data_core:data_core@localhost:55432/data_core
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -e '.[dev]'
+      - run: amazon-data-core migrate
+      - run: pytest -q
+      - run: amazon-data-core load-demo --file examples/demo_runs.jsonl
+      - run: amazon-data-core check
+      - run: |
+          python - <<'PY'
+          from amazon_data_core.db import connect
+          from amazon_data_core.engine import health_summary
+          with connect() as conn:
+              result = health_summary(conn)
+          assert result["tone"] == "clear", result
+          assert result["passed"] == 16, result
+          print(result)
+          PY
