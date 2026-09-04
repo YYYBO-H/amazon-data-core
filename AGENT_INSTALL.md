@@ -1,8 +1,14 @@
 # Agent installation contract
 
+This file is an execution contract for an Agent operating on the user's local
+computer. **Clone and run the existing repository. Do not generate a new app,
+frontend, dashboard or replacement implementation from these documents.**
+
 The goal is a verified local data service, not merely a cloned repository. An
 Agent may run installation and verification commands, but the user must enter
-Amazon secrets directly into the terminal.
+Amazon secrets directly into the terminal. If the Agent cannot execute local
+shell commands, it must explain that limitation instead of claiming the Core was
+installed.
 
 ## Full new-user flow
 
@@ -31,6 +37,10 @@ The onboarding result is successful only when the final output says
 `First sync passed`. If it reports failures, state the exact failed dataset. Do
 not describe successful LWA token exchange as proof that every required Amazon
 role is present.
+
+Do not open a visual app builder or reinterpret `docs/project-scope.md` as a
+request to build a user interface. The running Core already exposes its local
+status page, HTTP API and MCP server.
 
 ## Install without an Amazon account
 
