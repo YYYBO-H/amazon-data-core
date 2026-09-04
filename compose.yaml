@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: data_core
+      POSTGRES_USER: data_core
+      POSTGRES_PASSWORD: data_core
+    ports:
+      - "${POSTGRES_PORT:-55432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U data_core -d data_core"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - data_core_pg:/var/lib/postgresql/data
+
+  core:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://data_core:data_core@postgres:5432/data_core
+      LOAD_DEMO: ${LOAD_DEMO:-false}
+      AMAZON_CLIENT_ID: ${AMAZON_CLIENT_ID:-}
+      AMAZON_CLIENT_SECRET: ${AMAZON_CLIENT_SECRET:-}
+      AMAZON_REFRESH_TOKEN: ${AMAZON_REFRESH_TOKEN:-}
+      AMAZON_STORE_ID: ${AMAZON_STORE_ID:-}
+      AMAZON_MARKETPLACE_ID: ${AMAZON_MARKETPLACE_ID:-}
+      AMAZON_REGION: ${AMAZON_REGION:-NA}
+      AMAZON_TIMEZONE: ${AMAZON_TIMEZONE:-UTC}
+      AMAZON_CURRENCY: ${AMAZON_CURRENCY:-}
+      AMAZON_AD_CLIENT_ID: ${AMAZON_AD_CLIENT_ID:-}
+      AMAZON_AD_CLIENT_SECRET: ${AMAZON_AD_CLIENT_SECRET:-}
+      AMAZON_AD_REFRESH_TOKEN: ${AMAZON_AD_REFRESH_TOKEN:-}
+      AMAZON_AD_PROFILE_ID: ${AMAZON_AD_PROFILE_ID:-}
+      AMAZON_AD_REGION: ${AMAZON_AD_REGION:-NA}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${CORE_PORT:-8080}:8080"
+    command:
+      - sh
+      - -c
+      - >-
+        amazon-data-core migrate &&
+        if [ "$${LOAD_DEMO:-false}" = "true" ]; then
+          amazon-data-core load-demo --file examples/demo_runs.jsonl;
+        fi &&
+        amazon-data-core check &&
+        uvicorn amazon_data_core.api:app --host 0.0.0.0 --port 8080
+
+volumes:
+  data_core_pg:
