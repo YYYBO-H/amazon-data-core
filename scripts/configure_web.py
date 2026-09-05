@@ -13,6 +13,7 @@ import secrets
 import threading
 import time
 import webbrowser
+from collections.abc import Callable
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -275,12 +276,22 @@ class ConfigurationHandler(BaseHTTPRequestHandler):
         self.server.completed.set()
 
 
-def run_server(env_file: Path, host: str, port: int, *, open_browser: bool, timeout: int) -> int:
+def run_server(
+    env_file: Path,
+    host: str,
+    port: int,
+    *,
+    open_browser: bool,
+    timeout: int,
+    ready_callback: Callable[[str], None] | None = None,
+) -> int:
     server = ConfigurationServer((host, port), env_file)
     server.timeout = 1
     url = f"http://127.0.0.1:{server.server_port}/{server.token}/"
     print("Amazon credentials must not be sent through Agent chat.", flush=True)
     print(f"Private local authorization page: {url}", flush=True)
+    if ready_callback is not None:
+        ready_callback(url)
     if open_browser and not webbrowser.open(url):
         print("The browser did not open automatically. Open the private local URL above.", flush=True)
 

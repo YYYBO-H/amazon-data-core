@@ -21,29 +21,38 @@ first synchronization. Then run:
 ```
 
 The script first runs the credential-free installer. Only after Docker, the
-database, Core and the MCP contract pass does it open a temporary Amazon
-configuration page on `127.0.0.1`. When the page opens:
+database, Core and the MCP contract pass does it launch an independent
+background worker and open a temporary Amazon configuration page on
+`127.0.0.1`. The launcher returns after the page is ready; the authorization
+server and subsequent first sync do not depend on the Agent shell remaining
+open. When the page opens:
 
 1. tell the user to fill and submit the local page personally;
 2. do not ask the user to send credentials through chat;
 3. do not fill the credential fields, read browser form contents, or automate
    the page;
 4. do not echo, inspect, print, summarize or copy `.env`;
-5. wait for the same command to resume after `Local authorization saved`.
+5. tell the user that submission starts first synchronization automatically;
+6. when asked for progress, run
+   `python3 scripts/onboard_background.py status` and report its status.
 
 If the default browser does not open, direct the user to the exact private
 `http://127.0.0.1:...` URL printed by the command. That URL is temporary and
 must not be published or sent to another machine. The server binds only to
 localhost and shuts down after submission, cancellation or timeout.
+Runtime state and a credential-free diagnostic log are stored under the
+Git-ignored `.amazon-data-core/` directory with owner-only permissions.
 
 If the user has no private SP-API application or refresh token yet, pause the
 authorization portion and open [`docs/amazon-authorization.md`](docs/amazon-authorization.md).
 Do not imply that cloning this repository creates or approves an Amazon app.
 
-The onboarding result is successful only when the final output says
-`First sync passed`. If it reports failures, state the exact failed dataset. Do
-not describe successful LWA token exchange as proof that every required Amazon
-role is present.
+The onboarding result is successful only when the background status is
+`complete`; this is written only after synchronization outputs
+`First sync passed`. If status is `sync_failed`, inspect the credential-free
+`.amazon-data-core/onboard.log` and state the exact failed dataset. Do not
+describe successful LWA token exchange as proof that every required Amazon role
+is present.
 
 Do not open a visual app builder or reinterpret `docs/project-scope.md` as a
 request to build a user interface. The running Core already exposes its local
@@ -72,8 +81,7 @@ The installer defaults to an empty database. Demonstration data is opt-in with
 ## Rerun configuration or synchronization
 
 ```bash
-python3 scripts/configure_web.py
-./scripts/sync-all.sh
+python3 scripts/onboard_background.py launch
 ```
 
 If a browser is genuinely unavailable and the Agent can hand over a real TTY to
