@@ -42,12 +42,18 @@ cd amazon-data-core
 ./scripts/onboard.sh
 ```
 
-`onboard.sh` 会安装服务、执行数据库迁移和自检，然后自动打开一个只监听 `127.0.0.1` 的临时本机授权页面。你在页面里亲自填写凭证，提交后页面自动关闭授权环节并继续首次同步。凭证不会经过 Agent 聊天，只写入权限为 `0600` 且已被 Git 忽略的本机 `.env`。
+`onboard.sh` 会安装服务、执行数据库迁移和自检，然后启动独立的后台任务，自动打开一个只监听 `127.0.0.1` 的临时本机授权页面。即使 Agent 的命令会话已经结束，该页面仍可访问。你在页面里亲自填写凭证，提交后后台任务自动继续首次同步。凭证不会经过 Agent 聊天，只写入权限为 `0600` 且已被 Git 忽略的本机 `.env`。
 
 如果系统不能自动打开浏览器，请打开命令输出的 `http://127.0.0.1:...` 临时地址。只有浏览器也不可用时，才使用终端备用方式：
 
 ```bash
 ./scripts/onboard.sh --terminal-config
+```
+
+随时查询后台授权或同步状态：
+
+```bash
+python3 scripts/onboard_background.py status
 ```
 
 只安装空白 Core、暂不连接 Amazon：
@@ -60,7 +66,7 @@ cd amazon-data-core
 
 ## 如何确认安装完成
 
-完整的新用户流程只有在终端最终显示 `First sync passed` 时才算完成。如果某个数据集失败，脚本会列出失败项并返回非零退出码，不会把“部分成功”描述成“全部完成”。
+完整的新用户流程只有在 `python3 scripts/onboard_background.py status` 显示 `complete` 时才算完成；后台日志中同时会有 `First sync passed`。如果某个数据集失败，状态会是 `sync_failed`，日志会列出失败项，不会把“部分成功”描述成“全部完成”。
 
 空白 Core 可以用以下命令验证：
 

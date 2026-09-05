@@ -17,7 +17,8 @@ def test_onboarding_runs_install_before_collecting_credentials():
     script = (ROOT / "scripts" / "onboard.sh").read_text()
 
     assert script.index('"$SCRIPT_DIR/install.sh"') < script.index(
-        'python3 "$SCRIPT_DIR/configure_web.py"'
+        'python3 "$SCRIPT_DIR/onboard_background.py" launch'
     )
     assert '--terminal-config' in script
     assert '"$SCRIPT_DIR/sync-all.sh"' in script
+    assert ".amazon-data-core/" in (ROOT / ".gitignore").read_text().splitlines()

@@ -26,10 +26,13 @@ else
   if [ "$TERMINAL_CONFIG" = true ]; then
     echo "The local runtime passed. Amazon credentials will now be entered privately in this terminal."
     python3 "$SCRIPT_DIR/configure.py"
+    "$SCRIPT_DIR/sync-all.sh"
   else
-    echo "The local runtime passed. Opening a private localhost page for Amazon credentials."
-    python3 "$SCRIPT_DIR/configure_web.py"
+    echo "The local runtime passed. Launching private localhost authorization in the background."
+    python3 "$SCRIPT_DIR/onboard_background.py" launch
   fi
 fi
 
-"$SCRIPT_DIR/sync-all.sh"
+if [ "$USE_EXISTING" = true ]; then
+  "$SCRIPT_DIR/sync-all.sh"
+fi
