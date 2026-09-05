@@ -226,11 +226,11 @@ class ConfigurationHandler(BaseHTTPRequestHandler):
     def _valid_request(self) -> bool:
         path = urlsplit(self.path).path
         if path != f"/{self.server.token}/":
-            self.send_error(HTTPStatus.NOT_FOUND)
+            self.send_error(HTTPStatus.NOT_FOUND, "Local authorization link is invalid or expired")
             return False
         expected_host = f"127.0.0.1:{self.server.server_port}"
         if self.headers.get("Host") != expected_host:
-            self.send_error(HTTPStatus.FORBIDDEN)
+            self.send_error(HTTPStatus.FORBIDDEN, "Local authorization host did not match")
             return False
         return True
 
@@ -244,8 +244,11 @@ class ConfigurationHandler(BaseHTTPRequestHandler):
             return
         origin = self.headers.get("Origin")
         expected_origin = f"http://127.0.0.1:{self.server.server_port}"
-        if origin and origin != expected_origin:
-            self.send_error(HTTPStatus.FORBIDDEN)
+        # Chrome translation and some privacy extensions submit a local form
+        # from an opaque origin. The unguessable URL/CSRF token plus strict Host
+        # validation still prevent a remote page from forging this request.
+        if origin not in (None, "null", expected_origin):
+            self.send_error(HTTPStatus.FORBIDDEN, "Browser origin was not the local authorization page")
             return
         try:
             length = int(self.headers.get("Content-Length", "0"))
@@ -256,7 +259,7 @@ class ConfigurationHandler(BaseHTTPRequestHandler):
             return
         form = parse_qs(self.rfile.read(length).decode("utf-8"), keep_blank_values=True)
         if not secrets.compare_digest(_first(form, "csrf"), self.server.token):
-            self.send_error(HTTPStatus.FORBIDDEN)
+            self.send_error(HTTPStatus.FORBIDDEN, "Local authorization form expired; reopen the latest link")
             return
         if _first(form, "action") == "cancel":
             self.server.cancelled = True

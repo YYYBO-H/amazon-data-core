@@ -116,3 +116,25 @@ def test_local_http_flow_rejects_cross_origin_post(tmp_path: Path):
         server.shutdown()
         server.server_close()
         thread.join(timeout=2)
+
+
+def test_local_http_flow_accepts_chrome_opaque_origin(tmp_path: Path):
+    env_file = tmp_path / ".env"
+    server = configure_web.ConfigurationServer(("127.0.0.1", 0), env_file)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    url = f"http://127.0.0.1:{server.server_port}/{server.token}/"
+    request = Request(
+        url,
+        data=urlencode(_sp_form(server.token)).encode("utf-8"),
+        headers={"Origin": "null"},
+    )
+    try:
+        with urlopen(request) as response:
+            assert response.status == 200
+        assert env_file.exists()
+        assert server.completed.is_set()
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=2)
