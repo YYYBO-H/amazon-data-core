@@ -6,9 +6,9 @@ frontend, dashboard or replacement implementation from these documents.**
 
 The goal is a verified local data service, not merely a cloned repository. An
 Agent may run installation and verification commands, but the user must enter
-Amazon secrets directly into the terminal. If the Agent cannot execute local
-shell commands, it must explain that limitation instead of claiming the Core was
-installed.
+Amazon secrets in the temporary localhost authorization page. If the Agent
+cannot execute local shell commands, it must explain that limitation instead of
+claiming the Core was installed.
 
 ## Full new-user flow
 
@@ -21,13 +21,20 @@ first synchronization. Then run:
 ```
 
 The script first runs the credential-free installer. Only after Docker, the
-database, Core and the MCP contract pass does it start the interactive Amazon
-configuration. When the prompts appear:
+database, Core and the MCP contract pass does it open a temporary Amazon
+configuration page on `127.0.0.1`. When the page opens:
 
-1. give control of the terminal to the user;
+1. tell the user to fill and submit the local page personally;
 2. do not ask the user to send credentials through chat;
-3. do not echo, inspect, print, summarize or copy `.env`;
-4. resume after `Saved local configuration` appears.
+3. do not fill the credential fields, read browser form contents, or automate
+   the page;
+4. do not echo, inspect, print, summarize or copy `.env`;
+5. wait for the same command to resume after `Local authorization saved`.
+
+If the default browser does not open, direct the user to the exact private
+`http://127.0.0.1:...` URL printed by the command. That URL is temporary and
+must not be published or sent to another machine. The server binds only to
+localhost and shuts down after submission, cancellation or timeout.
 
 If the user has no private SP-API application or refresh token yet, pause the
 authorization portion and open [`docs/amazon-authorization.md`](docs/amazon-authorization.md).
@@ -65,9 +72,14 @@ The installer defaults to an empty database. Demonstration data is opt-in with
 ## Rerun configuration or synchronization
 
 ```bash
-python3 scripts/configure.py
+python3 scripts/configure_web.py
 ./scripts/sync-all.sh
 ```
+
+If a browser is genuinely unavailable and the Agent can hand over a real TTY to
+the user, use `./scripts/onboard.sh --terminal-config` or
+`python3 scripts/configure.py` as the fallback. Never pipe credentials into
+either installer.
 
 If configuration already exists and only the complete workflow needs to be
 validated, use:

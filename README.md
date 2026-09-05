@@ -27,22 +27,28 @@ FBM/MFN 库存、Sponsored Brands/Display、Targeting、Ads Unified Reporting �
 
 ```text
 请克隆这个仓库，并严格按照 AGENT_INSTALL.md 运行现有的 Amazon Data Core。
-不要重新开发应用或生成前端。需要 Amazon 凭证时把终端交给我输入，不要让我把凭证发送到聊天中。
+不要重新开发应用或生成前端。本机授权页面打开后让我亲自填写 Amazon 凭证；不要让我把凭证发送到聊天中，也不要读取 .env。
 ```
 
-Agent 专用的完整执行契约见 [`AGENT_INSTALL.md`](AGENT_INSTALL.md)。不具备本机终端能力的聊天产品不能代替你安装；这时请使用下面的终端入口。
+Agent 专用的完整执行契约见 [`AGENT_INSTALL.md`](AGENT_INSTALL.md)。Agent 需要具备本机命令执行能力，但不需要拥有可交互终端；普通网页聊天产品仍不能代替你安装。
 
 ## 在终端安装
 
 需要 Git、Docker Desktop 和 Docker Compose：
 
 ```bash
-git clone https://github.com/yanghanson801-rgb/amazon-data-core.git
+git clone https://github.com/YYYBO-H/amazon-data-core.git
 cd amazon-data-core
 ./scripts/onboard.sh
 ```
 
-`onboard.sh` 会安装服务、执行数据库迁移和自检，然后在本机终端引导 Amazon 授权与首次同步。凭证只写入权限为 `0600` 且已被 Git 忽略的本机 `.env`；不要把 Client Secret 或 Refresh Token 发给任何聊天模型。
+`onboard.sh` 会安装服务、执行数据库迁移和自检，然后自动打开一个只监听 `127.0.0.1` 的临时本机授权页面。你在页面里亲自填写凭证，提交后页面自动关闭授权环节并继续首次同步。凭证不会经过 Agent 聊天，只写入权限为 `0600` 且已被 Git 忽略的本机 `.env`。
+
+如果系统不能自动打开浏览器，请打开命令输出的 `http://127.0.0.1:...` 临时地址。只有浏览器也不可用时，才使用终端备用方式：
+
+```bash
+./scripts/onboard.sh --terminal-config
+```
 
 只安装空白 Core、暂不连接 Amazon：
 

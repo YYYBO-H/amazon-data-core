@@ -7,9 +7,12 @@
 交互式配置完成后，可以重新运行全部已配置的数据集：
 
 ```bash
-python3 scripts/configure.py
+python3 scripts/configure_web.py
 ./scripts/sync-all.sh
 ```
+
+配置页只监听本机 `127.0.0.1`，提交后即关闭。没有浏览器时可改用
+`./scripts/onboard.sh --terminal-config` 在真实终端中录入。
 
 一个数据集失败不会删除其他已经成功的数据，但命令会列出失败项并返回非零退出码。所有连接器都保留原始响应或原始报表、标准化版本、同步批次和质量结果。
 

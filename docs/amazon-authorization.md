@@ -18,8 +18,10 @@ against Amazon before requesting business data.
    account. Amazon generates the LWA refresh token during self-authorization.
 5. Open the application's LWA credentials and have these three values ready:
    client ID, client secret and refresh token.
-6. Run `./scripts/onboard.sh`. Enter the three secrets directly into the terminal
-   when prompted. Do not paste them into an Agent or chat window.
+6. Run `./scripts/onboard.sh`. Enter the three secrets personally in the
+   temporary localhost page that opens. Do not paste them into an Agent or chat
+   window. If no browser is available, use
+   `./scripts/onboard.sh --terminal-config` and enter them in a real terminal.
 
 Amazon's official references:
 
@@ -58,7 +60,12 @@ That hosted public-app OAuth service is intentionally outside this local Core.
 ## Local secret handling
 
 - `.env` is ignored by Git and written atomically with mode `0600`.
-- Secrets are entered through non-echoing terminal prompts.
+- Secrets are entered in a temporary page bound to `127.0.0.1`; the page shuts
+  down after submission, cancellation or timeout.
+- The browser form never renders existing secret values. A blank secret field
+  keeps its saved value when reconfiguring.
+- A non-echoing real-terminal wizard remains available with
+  `--terminal-config`.
 - Status output reports only whether fields exist; it never returns values.
 - The database stores sync facts and lineage, not LWA credentials.
 - Re-running the wizard lets the user press Enter to retain a saved secret.

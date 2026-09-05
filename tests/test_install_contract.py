@@ -17,6 +17,7 @@ def test_onboarding_runs_install_before_collecting_credentials():
     script = (ROOT / "scripts" / "onboard.sh").read_text()
 
     assert script.index('"$SCRIPT_DIR/install.sh"') < script.index(
-        'python3 "$SCRIPT_DIR/configure.py"'
+        'python3 "$SCRIPT_DIR/configure_web.py"'
     )
+    assert '--terminal-config' in script
     assert '"$SCRIPT_DIR/sync-all.sh"' in script
