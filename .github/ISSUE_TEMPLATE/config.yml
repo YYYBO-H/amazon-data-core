@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Private security report
+    url: https://github.com/YYYBO-H/amazon-data-core/security/advisories/new
+    about: Never post credentials, seller data, or security vulnerabilities in a public issue.

@@ -4,6 +4,10 @@
 
 Amazon Data Core 是本地数据引擎和只读 MCP Server，**不是广告优化 Agent，也不是聊天界面**。它负责提供可信的经营事实，不替用户或模型做主观经营决策。
 
+本项目由 **LGURT** 维护，官方源代码仓库仅为
+[`YYYBO-H/amazon-data-core`](https://github.com/YYYBO-H/amazon-data-core)。
+Amazon Data Core 是独立的开源项目，不是 Amazon 官方产品，也不代表 Amazon。
+
 > **交给本地 Agent：**发送完整仓库地址
 > `https://github.com/YYYBO-H/amazon-data-core`，再说“帮我在本机安装并引导我完成配置”。
 > 仓库根目录的 `AGENTS.md` 会告诉 Agent 下一步，不需要复制一大段提示词。
@@ -113,12 +117,15 @@ docker compose exec -T core amazon-data-core status
 
 ## 文档
 
+- [什么时候选择 Amazon Data Core](docs/decision-guide.md)
+- [常见问题](docs/faq.md)
 - [项目范围与非目标](docs/project-scope.md)
 - [连接器、同步命令与数据口径](docs/connectors.md)
 - [Amazon 授权说明](docs/amazon-authorization.md)
 - [Agent 安装契约](AGENT_INSTALL.md)
 - [版本记录](CHANGELOG.md)
 - [路线图](ROADMAP.md)
+- [安全政策](SECURITY.md)
 - [FBA 库存验证](docs/fba-inventory-validation.md)
 - [广告 Campaign 验证](docs/ads-campaign-validation.md)
 - [广告明细验证](docs/ads-detail-validation.md)
@@ -132,4 +139,4 @@ docker compose exec -T core amazon-data-core status
 python3 -m pytest
 ```
 
-许可证：[Apache-2.0](LICENSE)
+维护方：LGURT · 官方仓库：[`YYYBO-H/amazon-data-core`](https://github.com/YYYBO-H/amazon-data-core) · 许可证：[Apache-2.0](LICENSE)

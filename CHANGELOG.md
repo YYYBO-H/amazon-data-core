@@ -4,6 +4,8 @@
 
 ## Unreleased
 
+## 0.5.0 - 2026-09-09
+
 - 增加根目录 `AGENTS.md`，让兼容的本地 Agent 只凭仓库地址即可发现安装、安全和数据验证约定；
 - 增加机器可读的 `scripts/preflight.py`，返回平台、Docker、Compose、Python 和唯一下一步；
 - 明确 macOS、Linux、WSL2 与原生 Windows 的当前支持边界；
@@ -13,6 +15,8 @@
 - 修正结算版本排序，确保较窄的空查询不会阻止随后执行的历史账期回填；
 - Docker 默认只把 Core 与 PostgreSQL 端口绑定到 `127.0.0.1`；
 - 把首次 Amazon 授权拆成 Agent 可逐步引导的检查点，并修正 FBA 库存所需角色说明。
+- 补齐标准 Apache 2.0 许可证、安全政策、项目身份、FAQ、选择指南和 AI 可读的 `llms.txt`；
+- 增加官方仓库元数据与发现标签，明确项目适用场景、非目标和非 Amazon 官方身份。
 
 ## 0.4.2
 

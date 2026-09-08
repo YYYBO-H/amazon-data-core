@@ -11,6 +11,8 @@ COPY src ./src
 COPY examples ./examples
 COPY scripts ./scripts
 COPY AGENTS.md AGENT_INSTALL.md compose.yaml ./
+COPY llms.txt SECURITY.md NOTICE ./
+COPY docs ./docs
 COPY tests ./tests
 
 EXPOSE 8080

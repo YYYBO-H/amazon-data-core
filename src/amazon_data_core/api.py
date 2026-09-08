@@ -11,7 +11,7 @@ from .db import connect
 from .engine import health_summary, ingest_run, register_scope, run_checks, upsert_rule
 from .sync_status import sync_overview_from_database
 
-app = FastAPI(title="Amazon Data Core", version="0.4.2")
+app = FastAPI(title="Amazon Data Core", version="0.5.0")
 
 
 @app.get("/health")
