@@ -34,7 +34,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.3,<9"]
+dev = ["pytest>=8.3,<10"]
 agent = ["mcp>=1.12,<2"]
 
 [project.scripts]
