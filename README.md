@@ -4,6 +4,10 @@
 
 Amazon Data Core 是本地数据引擎和只读 MCP Server，**不是广告优化 Agent，也不是聊天界面**。它负责提供可信的经营事实，不替用户或模型做主观经营决策。
 
+> **交给本地 Agent：**发送完整仓库地址
+> `https://github.com/YYYBO-H/amazon-data-core`，再说“帮我在本机安装并引导我完成配置”。
+> 仓库根目录的 `AGENTS.md` 会告诉 Agent 下一步，不需要复制一大段提示词。
+
 ## 适合谁
 
 - 没有研发团队，希望让现有 Agent 使用自己真实店铺数据的 Amazon 卖家和运营人员；
@@ -23,18 +27,23 @@ FBM/MFN 库存、Sponsored Brands/Display、Targeting、Ads Unified Reporting �
 
 ## 交给 Agent 安装
 
-前提是 Agent 能读取 GitHub 仓库并在你的电脑上执行 Shell 命令。把仓库地址和下面这句话交给它：
-
-```text
-请克隆这个仓库，并严格按照 AGENT_INSTALL.md 运行现有的 Amazon Data Core。
-不要重新开发应用或生成前端。本机授权页面打开后让我亲自填写 Amazon 凭证；不要让我把凭证发送到聊天中，也不要读取 .env。
-```
+前提是 Agent 能读取 GitHub 仓库并在你的电脑上执行命令。用户只需给出上面的完整仓库地址并提出安装要求；Agent 应自动读取根目录的 [`AGENTS.md`](AGENTS.md)，再按 [`AGENT_INSTALL.md`](AGENT_INSTALL.md) 执行，不应要求用户复制安装提示词。
 
 Agent 专用的完整执行契约见 [`AGENT_INSTALL.md`](AGENT_INSTALL.md)。Agent 需要具备本机命令执行能力，但不需要拥有可交互终端；普通网页聊天产品仍不能代替你安装。
 
+Agent 会先运行一个不读取密钥的环境检查：
+
+```bash
+python3 scripts/preflight.py
+```
+
+它会用 JSON 返回 Docker、Compose、Python、平台支持情况和唯一的
+`next_action`，便于 Agent 明确告诉用户当前该做什么。
+
 ## 在终端安装
 
-需要 Git、Docker Desktop 和 Docker Compose：
+需要 Git、Docker Desktop（含 Docker Compose v2）和用于启动脚本的
+Python 3.9 或更高版本。Core 本身在 Docker 中使用 Python 3.11：
 
 ```bash
 git clone https://github.com/YYYBO-H/amazon-data-core.git
@@ -42,7 +51,10 @@ cd amazon-data-core
 ./scripts/onboard.sh
 ```
 
-`onboard.sh` 会安装服务、执行数据库迁移和自检，然后启动独立的后台任务，自动打开一个只监听 `127.0.0.1` 的临时本机授权页面。即使 Agent 的命令会话已经结束，该页面仍可访问。你在页面里亲自填写凭证，提交后后台任务自动继续首次同步。凭证不会经过 Agent 聊天，只写入权限为 `0600` 且已被 Git 忽略的本机 `.env`。
+`onboard.sh` 会安装服务、执行数据库迁移和自检，然后启动独立的后台任务，自动打开一个只监听 `127.0.0.1` 的临时本机授权页面。页面以“店铺范围 → SP-API → 可选广告”三步引导，并在提交后显示授权验证和首次同步的过渡状态。即使 Agent 的命令会话已经结束，该页面仍可访问。你在页面里亲自填写凭证，提交后后台任务自动继续首次同步。凭证不会经过 Agent 聊天，只写入权限为 `0600` 且已被 Git 忽略的本机 `.env`。
+
+目前已验证的入口是 macOS、Linux，以及 Windows 中的 WSL2。原生 Windows
+PowerShell 安装尚未验证；预检会明确返回 `use_wsl2`，不会假装已经兼容。
 
 如果系统不能自动打开浏览器，请打开命令输出的 `http://127.0.0.1:...` 临时地址。只有浏览器也不可用时，才使用终端备用方式：
 
@@ -79,10 +91,13 @@ docker compose exec -T core amazon-data-core status
 
 本地服务启动后提供：
 
-- 状态页：<http://localhost:8080>
+- 同步状态页：<http://localhost:8080>（每 3 秒刷新分数据集的真实分页数、记录数、错误和恢复命令）
 - API 文档：<http://localhost:8080/docs>
+- 同步状态 JSON：<http://localhost:8080/v1/sync-status>
 - 数据健康：<http://localhost:8080/v1/data-health>
 - 只读 MCP Server：`amazon-data-core mcp`
+
+状态页只有在必选数据集已经到达且质量检查通过时，才会显示“当前数据可以交给 Agent 分析”。Amazon Ads 没有配置时会明确显示为可选跳过，不会阻塞订单、FBA 库存和结算。
 
 ## 数据为什么可以核验
 

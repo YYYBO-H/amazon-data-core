@@ -4,7 +4,7 @@ import csv
 import gzip
 import io
 import os
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from uuid import uuid4
 
@@ -287,6 +287,60 @@ def test_sync_persists_closed_period_and_mcp_summary(isolated_store):
     assert "closed_settlement_cash_flow_not_order_date_revenue_or_profit" in summary[
         "warnings"
     ]
+
+
+def test_later_backfill_is_accepted_after_empty_narrow_window(isolated_store):
+    store_id = isolated_store
+    first_fetch = datetime.now(UTC)
+    backfill_fetch = first_fetch.replace(microsecond=0) + timedelta(minutes=1)
+
+    with connect() as conn:
+        empty = sync_settlements(
+            conn,
+            FakeClient([], {}),
+            config(store_id),
+            now=first_fetch,
+        )
+        backfill = sync_settlements(
+            conn,
+            FakeClient(
+                [report("REPORT-BACKFILL", "DOC-BACKFILL", "2026-09-01T12:00:00Z")],
+                {"DOC-BACKFILL": settlement_tsv("SETTLEMENT-BACKFILL")},
+            ),
+            config(store_id),
+            now=backfill_fetch,
+        )
+        checks = run_checks(conn)
+        state = conn.execute(
+            """SELECT source_count, normalized_count, source_updated_at
+               FROM current_dataset_state
+               WHERE store_id=%s AND dataset='settlement_periods'""",
+            (store_id,),
+        ).fetchone()
+        latest_run = conn.execute(
+            """SELECT accepted, rejection_reason, metadata
+               FROM dataset_runs
+               WHERE store_id=%s AND dataset='settlement_periods'
+               ORDER BY arrival_sequence DESC LIMIT 1""",
+            (store_id,),
+        ).fetchone()
+        issue_count = conn.execute(
+            "SELECT COUNT(*) AS n FROM v_open_issues WHERE store_id=%s",
+            (store_id,),
+        ).fetchone()["n"]
+
+    assert empty["reports_seen"] == 0
+    assert backfill["reports_downloaded"] == 1
+    assert state["source_count"] == 1
+    assert state["normalized_count"] == 1
+    assert state["source_updated_at"] == backfill_fetch
+    assert latest_run["accepted"] is True
+    assert latest_run["rejection_reason"] is None
+    assert latest_run["metadata"]["latest_report_created_at"] == (
+        "2026-09-01T12:00:00+00:00"
+    )
+    assert checks["evaluated"] >= 4
+    assert issue_count == 0
 
 
 def test_new_invalid_report_does_not_replace_valid_period(isolated_store):

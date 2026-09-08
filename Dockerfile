@@ -10,6 +10,7 @@ RUN pip install --no-cache-dir -e '.[dev,agent]'
 COPY src ./src
 COPY examples ./examples
 COPY scripts ./scripts
+COPY AGENTS.md AGENT_INSTALL.md compose.yaml ./
 COPY tests ./tests
 
 EXPOSE 8080

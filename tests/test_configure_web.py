@@ -54,6 +54,9 @@ def test_form_never_renders_existing_secret_values():
     page = configure_web.render_form(secrets, "page-token")
 
     assert "page-token" in page
+    assert page.count('class="panel"') == 3
+    assert "正在安全保存" in page
+    assert "developer-docs.amazon.com" in page
     for value in secrets.values():
         assert value not in page
 
@@ -70,6 +73,7 @@ def test_local_http_flow_writes_private_env_without_returning_secrets(tmp_path: 
             page = response.read().decode("utf-8")
             assert response.status == 200
             assert response.headers["Cache-Control"] == "no-store"
+            assert f"script-src 'nonce-{server.token}'" in response.headers["Content-Security-Policy"]
 
         payload = urlencode(_sp_form(server.token)).encode("utf-8")
         request = Request(

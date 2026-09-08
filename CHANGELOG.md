@@ -2,6 +2,18 @@
 
 本文件记录已经进入代码库的用户可见能力。未来计划单独记录在 [`ROADMAP.md`](ROADMAP.md)。
 
+## Unreleased
+
+- 增加根目录 `AGENTS.md`，让兼容的本地 Agent 只凭仓库地址即可发现安装、安全和数据验证约定；
+- 增加机器可读的 `scripts/preflight.py`，返回平台、Docker、Compose、Python 和唯一下一步；
+- 明确 macOS、Linux、WSL2 与原生 Windows 的当前支持边界；
+- 将本机凭证页改为带进度、校验、前后切换和同步过渡态的三步引导；
+- 增加每 3 秒刷新的本机同步状态页和 `/v1/sync-status`，展示各数据集的真实分页数、记录数、错误、恢复命令及 `safe_to_analyze`；
+- 根据错误类型生成精确恢复提示；Amazon Ads 报表仍在生成时保留原日期窗口并续传同一任务；
+- 修正结算版本排序，确保较窄的空查询不会阻止随后执行的历史账期回填；
+- Docker 默认只把 Core 与 PostgreSQL 端口绑定到 `127.0.0.1`；
+- 把首次 Amazon 授权拆成 Agent 可逐步引导的检查点，并修正 FBA 库存所需角色说明。
+
 ## 0.4.2
 
 - 默认通过临时的 localhost 页面安全录入 Amazon 凭证，使没有交互式 TTY

@@ -22,3 +22,18 @@ def test_onboarding_runs_install_before_collecting_credentials():
     assert '--terminal-config' in script
     assert '"$SCRIPT_DIR/sync-all.sh"' in script
     assert ".amazon-data-core/" in (ROOT / ".gitignore").read_text().splitlines()
+
+
+def test_repository_is_self_describing_for_local_agents():
+    instructions = (ROOT / "AGENTS.md").read_text()
+
+    assert "AGENT_INSTALL.md" in instructions
+    assert "scripts/preflight.py" in instructions
+    assert "Never request secrets in chat" in instructions
+
+
+def test_local_services_are_not_published_to_the_lan_by_default():
+    compose = (ROOT / "compose.yaml").read_text()
+
+    assert '127.0.0.1:${CORE_PORT:-8080}:8080' in compose
+    assert '127.0.0.1:${POSTGRES_PORT:-55432}:5432' in compose

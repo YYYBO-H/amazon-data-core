@@ -12,7 +12,8 @@ against Amazon before requesting business data.
 2. Register as an SP-API private developer in Amazon's Solution Provider Portal.
 3. Register a private seller application and request only the roles needed by
    the datasets you want:
-   - **Inventory and Order Tracking** for orders and inventory;
+   - **Inventory and Order Tracking** for orders;
+   - **Amazon Fulfillment** or **Product Listing** for FBA inventory summaries;
    - **Finance and Accounting** for settlement reports.
 4. In Developer Central, self-authorize that private application for your seller
    account. Amazon generates the LWA refresh token during self-authorization.
@@ -30,6 +31,30 @@ Amazon's official references:
 - [Register an application](https://developer-docs.amazon.com/sp-api/docs/registering-your-application)
 - [Onboarding and self-authorization](https://developer-docs.amazon.com/sp-api/docs/onboarding-overview)
 - [View LWA application credentials](https://developer-docs.amazon.com/sp-api/lang-US/docs/viewing-your-application-information-and-credentials)
+- [FBA Inventory API roles](https://developer-docs.amazon.com/sp-api/lang-en_EN/docs/fba-inventory-api)
+
+## How an Agent should guide a first-time user
+
+Do not send the whole document as a wall of text. Ask only enough to identify
+the user's current checkpoint, then guide one checkpoint at a time:
+
+1. confirm the selling plan and organization that owns the store;
+2. open the official registration page and wait for the user to finish Amazon's
+   account-side step;
+3. help the user select only the roles above;
+4. open the official self-authorization instructions and wait for completion;
+5. explain where the three LWA values are shown, without asking the user to
+   paste them into chat;
+6. launch the localhost configuration page and hand control to the user;
+7. report synchronization progress from the credential-free status command.
+
+Repository screenshots or videos should be used only where they materially
+reduce confusion. They must show the real Amazon interface, redact seller and
+application identifiers, include the capture date and locale, and sit next to
+an official link because Amazon can change its interface. A short video is best
+for a multi-page path; a screenshot is best for identifying a single field.
+Until such media has been captured and reviewed, use official links and precise
+checkpoint descriptions rather than fabricated mockups.
 
 If a role is added after a token was created, generate a new authorization so
 the token includes that role. A valid token can therefore pass LWA verification

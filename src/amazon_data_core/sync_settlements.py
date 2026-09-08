@@ -918,13 +918,19 @@ def sync_settlements(
            WHERE source=%s AND store_id=%s AND marketplace_scope=%s AND active""",
         (SOURCE, config.store_id, config.marketplace),
     ).fetchone()
-    source_updated_at = max(
+    latest_report_created_at = max(
         (
             _parse_api_time(report.get("createdTime"), "report_created_at")
             for report in reports
         ),
-        default=current_time,
+        default=None,
     )
+    # A settlement run is a snapshot of the report catalog at fetch time.  The
+    # newest report's createdTime cannot order snapshots safely: a narrow empty
+    # query followed by a wider historical backfill would otherwise reject the
+    # backfill as an older source version.  Use the catalog observation time for
+    # dataset ordering and retain the latest report timestamp as lineage.
+    source_updated_at = current_time
     catalog_checksum = hashlib.sha256(
         json.dumps(sorted(str(report["reportId"]) for report in reports)).encode()
     ).hexdigest()
@@ -964,6 +970,11 @@ def sync_settlements(
                 "created_since_days": config.created_since_days,
                 "automatically_generated_reports": True,
                 "marketplace_scope_is_not_row_marketplace": True,
+                "latest_report_created_at": (
+                    latest_report_created_at.isoformat()
+                    if latest_report_created_at
+                    else None
+                ),
             },
         ),
     )
@@ -989,7 +1000,7 @@ def sync_settlements(
             completed,
             duplicates,
             errors,
-            source_updated_at,
+            latest_report_created_at,
             UUID(core_run["run_id"]),
             "SettlementReportError" if errors else None,
             attempt_id,

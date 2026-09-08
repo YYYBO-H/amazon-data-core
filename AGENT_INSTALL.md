@@ -12,6 +12,37 @@ claiming the Core was installed.
 
 ## Full new-user flow
 
+First run the secret-free machine preflight and parse its JSON:
+
+```bash
+python3 scripts/preflight.py
+```
+
+Follow the returned `next_action`. Do not continue past a failed prerequisite
+or translate failure into a generic “try again” message. The current execution
+matrix is:
+
+- macOS: supported through Docker Desktop and the POSIX scripts;
+- Linux: supported through Docker Engine/Compose v2 and the POSIX scripts;
+- Windows with WSL2: use the Linux flow inside WSL2;
+- native Windows PowerShell: not yet verified; preflight returns `use_wsl2`.
+
+Before requesting credentials, establish which state the user is in:
+
+1. no Professional selling account: explain that the private-app path is not
+   available yet;
+2. account but no registered private SP-API application: guide registration;
+3. application exists but is not self-authorized: guide self-authorization;
+4. LWA client ID, client secret and refresh token are ready: continue to the
+   local configuration page;
+5. local configuration exists: install, verify and synchronize without asking
+   the user to paste saved values again.
+
+For states 1–3, use
+[`docs/amazon-authorization.md`](docs/amazon-authorization.md), show one step at
+a time, and link to the relevant official Amazon page. Do not invent button
+labels or use undated third-party screenshots as authoritative instructions.
+
 From the repository root, show the user that this command will build local
 Docker services, write a local `.env`, verify Amazon authorization and begin the
 first synchronization. Then run:
@@ -34,7 +65,9 @@ open. When the page opens:
 4. do not echo, inspect, print, summarize or copy `.env`;
 5. tell the user that submission starts first synchronization automatically;
 6. when asked for progress, run
-   `python3 scripts/onboard_background.py status` and report its status.
+   `python3 scripts/onboard_background.py status` and report its status. Once
+   the Core is running, use `http://localhost:8080/v1/sync-status` for
+   credential-free per-dataset pages, row counts, errors and recovery commands.
 
 If the default browser does not open, direct the user to the exact private
 `http://127.0.0.1:...` URL printed by the command. That URL is temporary and
@@ -74,6 +107,12 @@ docker compose exec -T core amazon-data-core doctor
 docker compose exec -T core python scripts/verify_mcp.py
 docker compose exec -T core amazon-data-core status
 ```
+
+The human-readable status page is `http://localhost:8080`; it polls the same
+read-only `/v1/sync-status` response every three seconds. Do not infer progress
+from elapsed time: report only the attempt state and counts returned by the
+Core. `safe_to_analyze` becomes true only after every required dataset is ready
+and the latest data-quality result is clear.
 
 The installer defaults to an empty database. Demonstration data is opt-in with
 `LOAD_DEMO=true docker compose up --build`.
