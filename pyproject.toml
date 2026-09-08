@@ -35,7 +35,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.3,<9"]
-agent = ["mcp>=1.12,<2"]
+agent = ["mcp>=1.12,<3"]
 
 [project.scripts]
 amazon-data-core = "amazon_data_core.cli:main"
